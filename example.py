@@ -1,15 +1,29 @@
 #!/usr/bin/env python
-
-
 import json
 
 from bottle import get, run, request, response, static_file
-from py2neo import Graph
+from neo4j import GraphDatabase
 
 
- #graph = Graph("http://username:<password>@localhost:7474")
-graph = Graph(user="neo4j",password="neo")
-#graph = Graph("bolt://localhost:7687")
+driver = GraphDatabase.driver("bolt://localhost:7687", auth=("neo4j", "neo"))
+
+def add_friend(tx, name, friend_name):
+    tx.run("MERGE (a:Person {name: $name}) "
+           "MERGE (a)-[:KNOWS]->(friend:Person {name: $friend_name})",
+           name=name, friend_name=friend_name)
+
+def print_friends(tx, name):
+    for record in tx.run("MATCH (a:Person)-[:KNOWS]->(friend) WHERE a.name = $name "
+                         "RETURN friend.name ORDER BY friend.name", name=name):
+         print(record["friend.name"])
+
+
+with driver.session() as session:
+    session.write_transaction(add_friend, "Arthur", "Guinevere")
+    session.write_transaction(add_friend, "Arthur", "Lancelot")
+    session.write_transaction(add_friend, "Arthur", "Merlin")
+    session.read_transaction(print_friends, "Arthur")
+
 
 @get("/")
 def get_index():
@@ -18,28 +32,7 @@ def get_index():
 
 @get("/graph")
 def get_graph():
-    results = graph.cypher.execute(
-        "MATCH (m:Movie)<-[:ACTED_IN]-(a:Person) "
-        "RETURN m.title as movie, collect(a.name) as cast "
-        "LIMIT {limit}", {"limit": 100})
-    nodes = []
-    rels = []
-    i = 0
-    for movie, cast in results:
-        nodes.append({"title": movie, "label": "movie"})
-        target = i
-        i += 1
-        for name in cast:
-            actor = {"title": name, "label": "actor"}
-            try:
-                source = nodes.index(actor)
-            except ValueError:
-                nodes.append(actor)
-                source = i
-                i += 1
-            rels.append({"source": source, "target": target})
-    return {"nodes": nodes, "links": rels}
-
+    return {}
 
 @get("/search")
 def get_search():
@@ -48,26 +41,26 @@ def get_search():
     except KeyError:
         return []
     else:
-        results = graph.cypher.execute(
-            "MATCH (movie:Movie) "
-            "WHERE movie.title =~ {title} "
-            "RETURN movie", {"title": "(?i).*" + q + ".*"})
-        response.content_type = "application/json"
-        return json.dumps([{"movie": row.movie.properties} for row in results])
-
+        #results = graph.cypher.execute(
+        #    "MATCH (movie:Movie) "
+        #    "WHERE movie.title =~ {title} "
+        #    "RETURN movie", {"title": "(?i).*" + q + ".*"})
+        #response.content_type = "application/json"
+        #return json.dumps([{"movie": row.movie.properties} for row in results])
+        return ["search"]
 
 @get("/movie/<title>")
 def get_movie(title):
-    results = graph.cypher.execute(
-        "MATCH (movie:Movie {title:{title}}) "
-        "OPTIONAL MATCH (movie)<-[r]-(person:Person) "
-        "RETURN movie.title as title,"
-        "collect([person.name, head(split(lower(type(r)),'_')), r.roles]) as cast "
-        "LIMIT 1", {"title": title})
-    row = results[0]
-    return {"title": row.title,
-            "cast": [dict(zip(("name", "job", "role"), member)) for member in row.cast]}
-
+    #results = graph.cypher.execute(
+    #    "MATCH (movie:Movie {title:{title}}) "
+    #    "OPTIONAL MATCH (movie)<-[r]-(person:Person) "
+    #    "RETURN movie.title as title,"
+    #    "collect([person.name, head(split(lower(type(r)),'_')), r.roles]) as cast "
+    #    "LIMIT 1", {"title": title})
+    #row = results[0]
+    #return {"title": row.title,
+    #        "cast": [dict(zip(("name", "job", "role"), member)) for member in row.cast]}
+    return []
 
 if __name__ == "__main__":
     run(port=8080)
