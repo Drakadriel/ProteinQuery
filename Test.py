@@ -1,24 +1,19 @@
-from neo4j.v1 import GraphDatabase
+from neo4j import GraphDatabase
 
+driver = GraphDatabase.driver("bolt://localhost:7687", auth=("neo4j", "neo"))
 
-class HelloWorldExample(object):
-    def __init__(self, uri, user, password):
-        self._driver = GraphDatabase.driver(uri, auth=(user, password))
+def add_friend(tx, name, friend_name):
+    tx.run("MERGE (a:Person {name: $name}) "
+           "MERGE (a)-[:KNOWS]->(friend:Person {name: $friend_name})",
+           name=name, friend_name=friend_name)
 
-    def close(self):
-        self._driver.close()
+def print_friends(tx, name):
+    for record in tx.run("MATCH (a:Person)-[:KNOWS]->(friend) WHERE a.name = $name "
+                         "RETURN friend.name ORDER BY friend.name", name=name):
+        print(record["friend.name"])
 
-    def print_greeting(self, message):
-        with self._driver.session() as session:
-            greeting = session.write_transaction(
-                self._create_and_return_greeting, message)
-            print(greeting)
-
-    @staticmethod
-    def _create_and_return_greeting(tx, message):
-        result = tx.run(
-            "CREATE (a:Greeting) "
-            "SET a.message = $message "
-            "RETURN a.message + ', from node ' + id(a)",
-            message=message)
-        return result.single()[0]
+with driver.session() as session:
+    session.write_transaction(add_friend, "Arthur", "Guinevere")
+    session.write_transaction(add_friend, "Arthur", "Lancelot")
+    session.write_transaction(add_friend, "Arthur", "Merlin")
+    session.read_transaction(print_friends, "Arthur")
