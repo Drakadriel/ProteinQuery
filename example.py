@@ -49,8 +49,8 @@ def get_search():
         #return json.dumps([{"movie": row.movie.properties} for row in results])
         return ["search"]
 
-@get("/movie/<title>")
-def get_movie(title):
+@get("/protein/<name>")
+def get_movie(name): #replace title with name 
     #results = graph.cypher.execute(
     #    "MATCH (movie:Movie {title:{title}}) "
     #    "OPTIONAL MATCH (movie)<-[r]-(person:Person) "

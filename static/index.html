@@ -82,7 +82,7 @@
 <script type="text/javascript">
     $(function () {
         function showMovie(title) {
-            $.get("/movie/" + encodeURIComponent(title),
+            $.get("/protein/" + encodeURIComponent(title),
                     function (data) {
                         if (!data) return;
                         $("#title").text(data.title);
@@ -127,7 +127,7 @@
 
     d3.json("/graph", function(error, graph) {
 		if (error) return;
-		
+
         force.nodes(graph.nodes).links(graph.links).start();
 
         var link = svg.selectAll(".link")
