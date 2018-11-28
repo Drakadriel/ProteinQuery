@@ -24,10 +24,19 @@ with driver.session() as session:
     session.write_transaction(add_friend, "Arthur", "Merlin")
     session.read_transaction(print_friends, "Arthur")
 
-def add_node_graph(tx, protein_name_1,list_domain_1, protein_name_2, list_domain_2):
-    tx.run("MERGE (a:Protein {name: $protein_name_1, domain: $list_domain_1})"
-            "MERGE (a)-[:SIMILAR]-(Protein {name:$protein_name_2, domain:$list_domain_2})",
-            protein_name_1=protein_name_1,protein_name_2=protein_name_2,list_domain_1=list_domain_1,list_domain_2=list_domain_2)
+# list_domain must be a python list
+def add_prot_graph(tx, protein_name,list_domain):
+    tx.run("MERGE (Protein {name: $protein_name)",
+            protein_name=protein_name)
+    for domain in list_domain:
+        tx.run("MERGE (Domain {name: $domain})", domain=domain)
+        tx.run("MERGE (Protein {name: $protein_name))-[:OWN]->(Domain {name:$domain})",
+                protein_name=protein_name, domain=domain)
+
+#predicat : les deux proteines sont similaires
+def rel_prot(tx, protein_name_1, protein_name_2):
+        tx.run("MERGE (Protein {name: $protein_name_1})-[:SIMILAR]->(Protein {name: $protein_name_2})",
+        protein_name_1=protein_name_1, protein_name_2=protein_name_2)
 
 @get("/")
 def get_index():
@@ -51,6 +60,10 @@ def get_search():
         #    "RETURN movie", {"title": "(?i).*" + q + ".*"})
         #response.content_type = "application/json"
         #return json.dumps([{"movie": row.movie.properties} for row in results])
+        #{"protein":{
+        #    "name":"PROUT",
+        #    "domain": ["d1","d2"]
+        #}}
         return ["search"]
 
 @get("/protein/<name>")
