@@ -24,6 +24,10 @@ with driver.session() as session:
     session.write_transaction(add_friend, "Arthur", "Merlin")
     session.read_transaction(print_friends, "Arthur")
 
+def add_node_graph(tx, protein_name_1,list_domain_1, protein_name_2, list_domain_2):
+    tx.run("MERGE (a:Protein {name: $protein_name_1, domain: $list_domain_1})"
+            "MERGE (a)-[:SIMILAR]-(Protein {name:$protein_name_2, domain:$list_domain_2})",
+            protein_name_1=protein_name_1,protein_name_2=protein_name_2,list_domain_1=list_domain_1,list_domain_2=list_domain_2)
 
 @get("/")
 def get_index():
@@ -50,7 +54,7 @@ def get_search():
         return ["search"]
 
 @get("/protein/<name>")
-def get_movie(name): #replace title with name 
+def get_movie(name): #replace title with name
     #results = graph.cypher.execute(
     #    "MATCH (movie:Movie {title:{title}}) "
     #    "OPTIONAL MATCH (movie)<-[r]-(person:Person) "
