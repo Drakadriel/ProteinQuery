@@ -6,7 +6,7 @@ from neo4j import GraphDatabase
 
 
 driver = GraphDatabase.driver("bolt://localhost:7687", auth=("neo4j", "neo"))
-
+tx = graph.cypher.begin()
 def add_friend(tx, name, friend_name):
     tx.run("MERGE (a:Person {name: $name}) "
            "MERGE (a)-[:KNOWS]->(friend:Person {name: $friend_name})",
@@ -17,26 +17,48 @@ def print_friends(tx, name):
                          "RETURN friend.name ORDER BY friend.name", name=name):
          print(record["friend.name"])
 
-
-with driver.session() as session:
-    session.write_transaction(add_friend, "Arthur", "Guinevere")
-    session.write_transaction(add_friend, "Arthur", "Lancelot")
-    session.write_transaction(add_friend, "Arthur", "Merlin")
-    session.read_transaction(print_friends, "Arthur")
-
-# list_domain must be a python list
+##############################################
+##############################################"
+##############################################"
+##############################################"
+# list_domain must be a python list, create a protein with its relatives domains
 def add_prot_graph(tx, protein_name,list_domain):
-    tx.run("MERGE (p:Protein {name: $protein_name)",
-            protein_name=protein_name)
+    #tx.run("MERGE (p:Protein {name: $protein_name)",
+        #    protein_name=protein_name)
+    if !(match_prot(protein_name)):
+        graph.cyber.execute("MERGE ($protein_name:Protein {name: $protein_name)",protein_name=protein_name)
     for domain in list_domain:
-        tx.run("MERGE (d:Domain {name: $domain})", domain=domain)
-        tx.run("MERGE (p:Protein {name: $protein_name))-[:OWN]->(d:Domain {name:$domain})",
+        #tx.run("MERGE (d:Domain {name: $domain})", domain=domain)
+        if !(match_domain(domain)):
+                graph.cyber.execute("MERGE ($domain_name:Domain {name: $domain_name)",domain_name=domain)
+        graph.cypher.execute("MATCH ($protein_name:Protein({name:$protein_name})),($domain:Domain {name:$domain}) MERGE ($protein_name)-[:OWN]->($domain)",
                 protein_name=protein_name, domain=domain)
 
 #predicat : les deux proteines sont similaires
-def rel_prot(tx, protein_name_1, protein_name_2):
-        tx.run("MERGE (p:Protein {name: $protein_name_1})-[:SIMILAR]->(p:Protein {name: $protein_name_2})",
+def rel_prot(tx,protein_name_1, protein_name_2):
+        graph.cypher.execute("MERGE (p:Protein {name: $protein_name_1})-[:SIMILAR]->(p:Protein {name: $protein_name_2})",
         protein_name_1=protein_name_1, protein_name_2=protein_name_2)
+
+def match_prot(protein_name):
+        results = graph.cypher.execute(
+        "MATCH (n:Protein) WHERE n.name=$name RETURN n", name=protein_name
+        )
+        #return json.dumps([{"protein" : row.n} for row in results])
+        return results
+
+def match_domain(domain_name):
+        results = graph.cypher.execute(
+        "MATCH (n:Domain) WHERE n.name=$name RETURN n", name=domain_name
+        )
+        #return json.dumps([{"protein" : row.n} for row in results])
+        return results
+with driver.session() as session:
+    #session.write_transaction(add_friend, "Arthur", "Guinevere")
+    #session.write_transaction(add_friend, "Arthur", "Lancelot")
+    #session.write_transaction(add_friend, "Arthur", "Merlin")
+    #session.read_transaction(print_friends, "Arthur")
+
+
 
 @get("/")
 def get_index():
