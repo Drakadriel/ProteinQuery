@@ -24,22 +24,21 @@ def add_prot_graph(tx, protein_name,list_domain):
     #tx.run("MERGE (p:Protein {name: $protein_name)",
         #    protein_name=protein_name)
 
-    if not(match_prot(tx,protein_name)):
-        tx.run("MERGE ($protein_name:Protein {name: $protein_name)",protein_name=protein_name)
-    for domain in list_domain:
+    #if not(match_prot(tx,protein_name)):
+    tx.run("MERGE (p:Protein {name: $protein_name})",protein_name=protein_name)
         #tx.run("MERGE (d:Domain {name: $domain})", domain=domain)
-        if not(match_domain(tx,domain)):
-            tx.run("MERGE ($domain_name:Domain {name: $domain_name)",domain_name=domain)
-
+    #    if not(match_domain(tx,domain)):
+    for domain in list_domain:
+        tx.run("MERGE (d:Domain {name: $domain_name})",domain_name=domain)
         tx.run("MATCH (p:Protein{name:$protein_name}),(d:Domain {name:$domain}) MERGE (p)-[:OWN]->(d)",
                 protein_name=protein_name, domain=domain)
 
 #predicat : les deux proteines sont similaires
 def rel_prot(tx,protein_name_1, protein_name_2):
         if not(match_prot(tx,protein_name_1)):
-            tx.run("MERGE ($protein_name:Protein {name: $protein_name)",protein_name=protein_name_1)
+            tx.run("MERGE (p:Protein {name: $protein_name})",protein_name=protein_name_1)
         if not(match_prot(tx,protein_name_2)):
-            tx.run("MERGE ($protein_name:Protein {name: $protein_name)",protein_name=protein_name_2)
+            tx.run("MERGE (p:Protein {name: $protein_name})",protein_name=protein_name_2)
         tx.run("MERGE (p:Protein {name: $protein_name_1})-[:SIMILAR]-(p:Protein {name: $protein_name_2})",protein_name_1=protein_name_1, protein_name_2=protein_name_2)
 
 def match_prot(tx,protein_name):
