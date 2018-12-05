@@ -2,7 +2,7 @@
 
 from settings import DATABASE_FILE
 
-import parser
+import dbparser
 import process
 from itertools import islice
 db = parser.open_database(DATABASE_FILE)
