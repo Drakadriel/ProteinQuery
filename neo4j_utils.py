@@ -6,7 +6,8 @@ import process
 from itertools import islice
 
 driver = GraphDatabase.driver("bolt://localhost:7687", auth=("neo4j", "neo"))
-
+'''
+#Exemples qui marchent
 def add_friend(tx, name, friend_name):
     tx.run("MERGE (a:Person {name: $name}) "
            "MERGE (a)-[:KNOWS]->(friend:Person {name: $friend_name})",
@@ -17,9 +18,7 @@ def print_friends(tx, name):
                          "RETURN friend.name ORDER BY friend.name", name=name):
          print(record["friend.name"])
 
-
-##############################################"
-##############################################"
+'''
 # list_domain must be a python list, create a protein with its relatives domains
 def add_prot_graph(tx, protein_name,list_domain):
     #tx.run("MERGE (p:Protein {name: $protein_name)",

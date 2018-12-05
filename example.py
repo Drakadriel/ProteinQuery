@@ -35,29 +35,12 @@ def get_search():
     except KeyError:
         return []
     else:
-        #results = graph.cypher.execute(
-        #    "MATCH (movie:Movie) "
-        #    "WHERE movie.title =~ {title} "
-        #    "RETURN movie", {"title": "(?i).*" + q + ".*"})
-        #response.content_type = "application/json"
-        #return json.dumps([{"movie": row.movie.properties} for row in results])
-        #{"protein":{
-        #    "name":"PROUT",
-        #    "domain": ["d1","d2"]
-        #}}
+
         return ["search"]
 
 @get("/protein/<name>")
-def get_movie(name): #replace title with name
-    #results = graph.cypher.execute(
-    #    "MATCH (movie:Movie {title:{title}}) "
-    #    "OPTIONAL MATCH (movie)<-[r]-(person:Person) "
-    #    "RETURN movie.title as title,"
-    #    "collect([person.name, head(split(lower(type(r)),'_')), r.roles]) as cast "
-    #    "LIMIT 1", {"title": title})
-    #row = results[0]
-    #return {"title": row.title,
-    #        "cast": [dict(zip(("name", "job", "role"), member)) for member in row.cast]}
+def get_protein(name): #replace title with name
+
     return []
 
 if __name__ == "__main__":
