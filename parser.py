@@ -1,11 +1,17 @@
 #!/usr/bin/env python3
 
 import gzip
+import collections
+
+Protein = collections.namedtuple("Protein", ["name", "description", "domains"])
+
 
 def open_database(filename):
     strip_newline = lambda l: l.rstrip("\n")
     f = gzip.open(filename, 'rt')
     return map(strip_newline, f)
+
+
 
 def parse(db):
     current_prot_id = None
@@ -20,7 +26,7 @@ def parse(db):
 
         type = None
         if line == '//':
-            yield (current_prot_id, current_prot_domains)
+            yield Protein(current_prot_id, "", current_prot_domains)
             continue
 
         if not line.startswith(" "):
