@@ -103,3 +103,6 @@ venv.bak/
 # mypy
 .mypy_cache/
 settings.py
+
+
+uniprot-reviewed%3Ayes.txt.gz
