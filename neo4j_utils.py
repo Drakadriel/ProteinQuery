@@ -69,10 +69,10 @@ def show_similar_induce(tx):
 def show_similar():
     with driver.session() as session:
         session.read_transaction(show_similar)
-        
-def exec_simil(prot_name1, prot_name2):
+
+def exec_simil(prot_name1, prot_name2, quot):
     with driver.session() as session:
-        session.write_transaction(rel_prot,prot_name1,prot_name2)
+        session.write_transaction(rel_prot,prot_name1,prot_name2, quot)
 
 def exec_add(prot_name,domains):
     with driver.session() as session:

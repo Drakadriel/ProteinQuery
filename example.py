@@ -27,10 +27,10 @@ def construct():
     for prot in islice(dbparser.parse(db), 200000):
         neo4j_utils.exec_add(prot.name, prot.domains)
 
-get("/similar")
+@get("/similar")
 def do_similar():
-    parser = dbparser.open_proximities(PROXY)
-    for prot1,prot2,quot in dbparser.parse(parser):
+    parser = dbparser.open_proximities("proximities")
+    for prot1,prot2,quot in parser:
         neo4j_utils.exec_simil(prot1,prot2,quot)
 
 @get("/search")
