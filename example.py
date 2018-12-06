@@ -97,10 +97,32 @@ def show_similar_induce(tx):
 def get_index():
     return static_file("index.html", root="static")
 
-
 @get("/graph")
 def get_graph():
-    return {}
+    name = "P85552";
+    results = driver.session().run(
+    "MATCH p=(p1:Protein)-[r:OWN]->(d:Domain)"
+    "RETURN p1.name as name, collect(d.name) as cast "
+    "LIMIT 10")
+
+    nodes = []
+    rels = []
+    i = 0
+    for protein in results:
+        print(protein)
+        nodes.append({"name": protein["name"], "label": "protein", "group": 1})
+        target = i
+        i += 1
+        for name in protein["cast"]:
+            domain = {"title": name, "label": "domain", "group": 2}
+            try:
+                source = nodes.index(domain)
+            except ValueError:
+                nodes.append(domain)
+                source = i
+                i += 1
+            rels.append({"source": source, "target": target})
+    return {"nodes": nodes, "links": rels}
 #ne pas reuse après avoir fait car prend une plombe
 @get("/construct")
 def construct():
@@ -187,11 +209,11 @@ def get_graph():
         target = i
         i += 1
         for name in protein["domains"]:
-            actor = {"title": name, "label": "actor"}
+            domain = {"title": name, "label": "domain"}
             try:
-                source = nodes.index(actor)
+                source = nodes.index(domain)
             except ValueError:
-                nodes.append(actor)
+                nodes.append(domain)
                 source = i
                 i += 1
             rels.append({"source": source, "target": target})
