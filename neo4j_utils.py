@@ -49,11 +49,15 @@ def match_domain(tx,domain_name):
         #return json.dumps([{"protein" : row.n} for row in results])
         return results
 
+def show_similar(tx):
+    results = tx.run("MATCH p=()-[r:SIMILAR]->() RETURN p LIMIT 25")
+    return results
+
 def show_solo_prot(tx):
     results = tx.run("MATCH (p:Protein) WHERE NOT (p)-[:OWN]-(:Domain) RETURN p LIMIT 25")
     return results
 
-def show_similar(tx):
+def show_similar_induce(tx):
     results = tx.run("MATCH (p1:Protein)-[:OWN]->(d:Domain)<-[:OWN]-(p2:Protein) return p1.name, p2.name, d.name LIMIT 25")
     return results
 
@@ -62,7 +66,10 @@ def show_similar(tx):
 ##################################"
 ##################################""
 
-
+def show_similar():
+    with driver.session() as session:
+        session.read_transaction(show_similar)
+        
 def exec_simil(prot_name1, prot_name2):
     with driver.session() as session:
         session.write_transaction(rel_prot,prot_name1,prot_name2)
