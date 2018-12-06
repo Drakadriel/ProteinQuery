@@ -72,6 +72,10 @@ def show_similar(tx):
     results = tx.run("MATCH p=()-[r:SIMILAR]->() RETURN p LIMIT 100")
     return results
 
+def show_own():
+    results = driver.session().run("MATCH p=()-[r:OWN]->() RETURN p LIMIT 100")
+    return results
+
 def show_solo_prot(tx):
     results = tx.run("MATCH (p:Protein) WHERE NOT (p)-[:OWN]-(:Domain) RETURN p LIMIT 100")
     return results
@@ -119,9 +123,13 @@ def show_similar_induce():
         session.read_transaction(show_similar_induce)
 
 @get("/show_similar")
-def show_similar():
+def exec_show_similar():
     with driver.session() as session:
         session.read_transaction(show_similar)
+
+@get("/show_own")
+def exec_show_own():
+    show_own()
 
 @get("/protein")
 def get_protein():
