@@ -29,8 +29,9 @@ def construct():
 
 get("/similar")
 def do_similar():
-    #TODO faire la fonction avec smilarities
-    #neo4j_utils.exec_simil(prot1,prot2)
+    parser = dbparser.open_proximities(PROXY)
+    for prot1,prot2,quot in dbparser.parse(parser):
+        neo4j_utils.exec_simil(prot1,prot2,quot)
 
 @get("/search")
 def get_search():

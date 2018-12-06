@@ -29,10 +29,10 @@ def add_prot_graph(tx, protein_name,list_domain):
     return ["ok"]
 
 #predicat : les deux proteines sont similaires
-def rel_prot(tx,protein_name_1, protein_name_2):
+def rel_prot(tx,protein_name_1, protein_name_2, quot):
         tx.run("MERGE (p:Protein {name: $protein_name})",protein_name=protein_name_1)
         tx.run("MERGE (p:Protein {name: $protein_name})",protein_name=protein_name_2)
-        tx.run("MATCH (p1:Protein {name: $protein_name_1}),(p2:Protein {name: $protein_name_2}) MERGE (p1)-[:SIMILAR]-(p2)",protein_name_1=protein_name_1, protein_name_2=protein_name_2)
+        tx.run("MATCH (p1:Protein {name: $protein_name_1}),(p2:Protein {name: $protein_name_2}) MERGE (p1)-[:SIMILAR {quotien:$quot}]-(p2)",protein_name_1=protein_name_1, quot=quot, protein_name_2=protein_name_2)
         return ["ok"]
 
 def match_prot(tx,protein_name):
