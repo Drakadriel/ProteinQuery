@@ -129,22 +129,37 @@ def exec_show_similar():
 
 @get("/show_own")
 def exec_show_own():
-    show_own()
+    tmp = driver.session().run("MATCH (p:Protein)-[r:OWN]->(d:Domain) RETURN p.name, d.name LIMIT 100")
+    records = tmp.records()
+    #, "domains": []
+    res = [r.value() for r in records]
+    return json.dumps(res)
 
 @get("/protein")
 def get_protein():
-    with driver.session() as session:
-        session.read_transaction(match_prot_all)
+    tmp = driver.session().run("MATCH (n:Protein) RETURN n.name LIMIT 100")
+    records = tmp.records()
+    #, "domains": []
+    res = [r.value() for r in records]
+    return json.dumps(res)
+
+
 
 @get("/domain")
 def get_domain():
-    with driver.session() as session:
-        session.read_transaction(match_domain)
+    tmp = driver.session().run("MATCH (n:Domain) RETURN n.name LIMIT 100")
+    records = tmp.records()
+    #, "domains": []
+    res = [r.value() for r in records]
+    return json.dumps(res)
 
 @get("/soloProt")
 def getSolo():
-    with driver.session() as session:
-        session.read_transaction(show_solo_prot)
+    tmp = driver.session().run("MATCH (p:Protein) WHERE NOT (p)-[:OWN]-(:Domain) RETURN p.name LIMIT 100")
+    records = tmp.records()
+    #, "domains": []
+    res = [r.value() for r in records]
+    return json.dumps(res)
 
 
 ##################################"
@@ -154,3 +169,31 @@ def getSolo():
 
 if __name__ == "__main__":
     run(port=8080)
+
+
+'''
+@get("/graph")
+def get_graph():
+    results = graph.cypher.execute(
+    "MATCH (p:Protein)"
+    "RETURN p.name as name, collect(a.domains) as cast "
+    "LIMIT {limit}", {"limit": 100})
+
+    nodes = []
+    rels = []
+    i = 0
+    for protein in results:
+        nodes.append({"name": protein["name"], "label": "protein"})
+        target = i
+        i += 1
+        for name in protein["domains"]:
+            actor = {"title": name, "label": "actor"}
+            try:
+                source = nodes.index(actor)
+            except ValueError:
+                nodes.append(actor)
+                source = i
+                i += 1
+            rels.append({"source": source, "target": target})
+    return {"nodes": nodes, "links": rels}
+'''
