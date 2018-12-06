@@ -27,6 +27,10 @@ def construct():
     for prot in islice(dbparser.parse(db), 200000):
         neo4j_utils.exec_add(prot.name, prot.domains)
 
+get("/similar")
+def do_similar():
+    #TODO faire la fonction avec smilarities
+    #neo4j_utils.exec_simil(prot1,prot2)
 
 @get("/search")
 def get_search():

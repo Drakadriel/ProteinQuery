@@ -21,25 +21,19 @@ def print_friends(tx, name):
 '''
 # list_domain must be a python list, create a protein with its relatives domains
 def add_prot_graph(tx, protein_name,list_domain):
-    #tx.run("MERGE (p:Protein {name: $protein_name)",
-        #    protein_name=protein_name)
-
-    #if not(match_prot(tx,protein_name)):
     tx.run("MERGE (p:Protein {name: $protein_name})",protein_name=protein_name)
-        #tx.run("MERGE (d:Domain {name: $domain})", domain=domain)
-    #    if not(match_domain(tx,domain)):
     for domain in list_domain:
         tx.run("MERGE (d:Domain {name: $domain_name})",domain_name=domain)
         tx.run("MATCH (p:Protein{name:$protein_name}),(d:Domain {name:$domain}) MERGE (p)-[:OWN]->(d)",
                 protein_name=protein_name, domain=domain)
+    return ["ok"]
 
 #predicat : les deux proteines sont similaires
 def rel_prot(tx,protein_name_1, protein_name_2):
-        if not(match_prot(tx,protein_name_1)):
-            tx.run("MERGE (p:Protein {name: $protein_name})",protein_name=protein_name_1)
-        if not(match_prot(tx,protein_name_2)):
-            tx.run("MERGE (p:Protein {name: $protein_name})",protein_name=protein_name_2)
-        tx.run("MERGE (p:Protein {name: $protein_name_1})-[:SIMILAR]-(p:Protein {name: $protein_name_2})",protein_name_1=protein_name_1, protein_name_2=protein_name_2)
+        tx.run("MERGE (p:Protein {name: $protein_name})",protein_name=protein_name_1)
+        tx.run("MERGE (p:Protein {name: $protein_name})",protein_name=protein_name_2)
+        tx.run("MATCH (p1:Protein {name: $protein_name_1}),(p2:Protein {name: $protein_name_2}) MERGE (p1)-[:SIMILAR]-(p2)",protein_name_1=protein_name_1, protein_name_2=protein_name_2)
+        return ["ok"]
 
 def match_prot(tx,protein_name):
         results = tx.run(
@@ -54,6 +48,10 @@ def match_domain(tx,domain_name):
         )
         #return json.dumps([{"protein" : row.n} for row in results])
         return results
+
+def exec_simil(prot_name1, prot_name2):
+    with driver.session() as session:
+        session.write_transaction(rel_prot,prot_name1,prot_name2)
 
 def exec_add(prot_name,domains):
     with driver.session() as session:
